@@ -1,0 +1,30 @@
+# Save this as .github/workflows/daily.yml in your repo
+name: Daily tech myth-bust scrape
+
+on:
+  schedule:
+    # 13:30 UTC daily. Adjust to your local morning.
+    - cron: "30 13 * * *"
+  workflow_dispatch:  # lets you trigger manually from GitHub mobile app
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SHEET_WEBHOOK_URL: ${{ secrets.SHEET_WEBHOOK_URL }}
+          SHEET_SECRET: ${{ secrets.SHEET_SECRET }}
+        run: python scraper.py
